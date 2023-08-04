@@ -1,0 +1,146 @@
+basePath: /
+definitions:
+  models.BadRequestError:
+    properties:
+      error:
+        example: You exhausted your limit
+        type: string
+      statusCode:
+        example: 400
+        type: integer
+      timeToReset:
+        example: 10
+        type: integer
+    type: object
+  models.CreateRequest:
+    properties:
+      customTag:
+        example: net-short
+        type: string
+      expireTime:
+        example: 10
+        type: integer
+      url:
+        example: www.netlify.com
+        type: string
+    type: object
+  models.CreateResponse:
+    properties:
+      customTag:
+        example: net-short
+        type: string
+      expireTime:
+        example: 10
+        type: integer
+      rateLimit:
+        example: 29
+        type: integer
+      rateLimitReset:
+        example: 29
+        type: integer
+      url:
+        example: www.netlify.com
+        type: string
+    type: object
+  models.RequestError:
+    properties:
+      error:
+        example: Internal Server Error
+        type: string
+      statusCode:
+        example: 500
+        type: integer
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: harshpareek91@gmail.com
+    name: Harsh Pareeek
+    url: https://www.github.com/harshtalks
+  description: |
+    # URLr link shortener API
+
+    ## Technologies Used
+
+    - Go
+    - Fiber
+    - UUID
+    - Distributed In-Memory Key-Value Store
+
+    ### Description
+
+    We are using a distributed in-memory key-value store to store data related to rate limiter and shortened urls.
+    We are using Redis cloud as a DaaS.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: URLr APIs
+  version: "1.0"
+paths:
+  /{tag}:
+    get:
+      consumes:
+      - application/json
+      description: redirect to original url by tag (shortened url tag)
+      operationId: redirect-from-custom-url
+      parameters:
+      - description: Custom Tag
+        in: path
+        name: tag
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "301":
+          description: Moved Permanently
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.RequestError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.RequestError'
+      summary: Fetch the shortened Url from the redis and then redirect to the original
+        url upon success.
+      tags:
+      - Fetch URL
+  /create:
+    post:
+      consumes:
+      - application/json
+      description: create the shortened url by providing the url, expiration time,
+        and custom tag. All are necessary. for server generated tag, give custom tag
+        as empty string.
+      parameters:
+      - description: The input request
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.RequestError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.BadRequestError'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/models.BadRequestError'
+      summary: Create a shortened URL
+      tags:
+      - Create Shortened URL
+swagger: "2.0"
